@@ -6,6 +6,8 @@ const generateToken = require("../functions/generateToken.js");
 // register
 // POST
 // @route /users/register
+// public
+
 const registerUser = asyncHandler(async (req, res) => {
   const { name, email, password } = req.body;
 
@@ -44,35 +46,62 @@ const registerUser = asyncHandler(async (req, res) => {
   }
 });
 
-
 /// login
 /// POST
 /// route /users/login
-const loginUser =  asyncHandler( async(req, res)=>{
-    const {email, password} = req.body;
+// public
 
-    const user = await User.findOne({userEmail: email });
+const loginUser = asyncHandler(async (req, res) => {
+  const { email, password } = req.body;
 
-    if(user && (await bcryptjs.compare(password, user.password))){
-      res.json({
-        _id: user.id,
-        userName: user.userName,
-        userEmail: user.userEmail,
-        role: user.role,
-        token: generateToken(user.id),
-      });
-    } else {
-      res.status(400);
-      throw new Error("Invalid user credentials");
-    }
-  });
+  const user = await User.findOne({ userEmail: email });
 
-  //// get one user
-  /// GET
-  /// @route /users/user
-const getOneUser = asyncHandler(async(req, res) => {
-res.status(200).json(req.user);
-  });
+  if (user && (await bcryptjs.compare(password, user.password))) {
+    res.json({
+      _id: user.id,
+      userName: user.userName,
+      userEmail: user.userEmail,
+      role: user.role,
+      token: generateToken(user.id),
+    });
+  } else {
+    res.status(400);
+    throw new Error("Invalid user credentials");
+  }
+});
 
+//// get one user
+/// GET
+/// @route /users/user
+// private owner, admin
 
-module.exports = { registerUser, loginUser, getOneUser } ;
+const getOneUser = asyncHandler(async (req, res) => {
+  res.status(200).json(req.user);
+});
+
+// get all users
+// GET
+// @route /users/all
+/// private admin
+
+const getAllUsers = asyncHandler(async (req, res) => {
+  const users = await User.aggregate([
+    {
+      $lookup: {
+        from: "ads",
+        localField: "_id",
+        foreignField: "userID",
+        as: "ads",
+      },
+    },
+    {
+      $match: { role: { $in: ["simple", "admin"] } },
+    },
+    {
+      $unset: ["password", "createdAt", "updatedAt", "__v"],
+    },
+  ]);
+  res.status(200).json(users);
+});
+
+module.exports = { registerUser, loginUser, getOneUser, getAllUsers };

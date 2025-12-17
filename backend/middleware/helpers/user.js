@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-const User = require("../..model/User.js");
+const User = require("../../model/User.js");
 /// cia bus user modelis
 
 const NOT_AUTHORIZED = "User not authorized";
@@ -7,11 +7,11 @@ const NOT_AUTHORIZED_NO_TOKEN = "User not authorized, token not found";
 
 async function getUser(req) {
   if (
-    req.header.authorization &&
-    req.header.authorization.startsWith("Bearer")
+    req.headers.authorization &&
+    req.headers.authorization.startsWith("Bearer")
   ) {
     try {
-      const token = req.header.authorization.split(" ")[1]; ///grazina pilna authorization
+      const token = req.headers.authorization.split(" ")[1]; ///grazina pilna authorization
 
       if (!token) {
         return { status: 403, response: NOT_AUTHORIZED_NO_TOKEN };

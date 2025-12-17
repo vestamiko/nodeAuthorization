@@ -1,5 +1,5 @@
 const asyncHandler = require("express-async-handler");
-const { getUser } = require("/.helpers/users.js");
+const { getUser } = require("./helpers/user.js");
 
 const protect = asyncHandler(async (req, res, next) => {
   const { status, response } = await getUser(req);
@@ -12,4 +12,4 @@ const protect = asyncHandler(async (req, res, next) => {
   }
 });
 
-module.exports =  protect ;
+module.exports = protect;
