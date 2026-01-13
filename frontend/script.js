@@ -19,11 +19,23 @@ const createAd = document.getElementById("createAd");
 const signOut = document.getElementById("signOut");
 const greeting = document.getElementById("greeting");
 
+///// GREETING
+const tokenData = JSON.parse(localStorage.getItem("token"));
+if (tokenData) {
+  greeting.innerHTML = `Labas, ${tokenData.userName}`;
+} else {
+  greeting.innerHTML = `Labas, Guest`;
+} 
+
 //// GAUTI TOKEN IS LS
+// const dataFromLS = () => {
+//   return JSON.parse(localStorage.getItem("token"))
+//     ? JSON.parse(localStorage.getItem("token")).userName
+//     : "Guest";
+// };
 const dataFromLS = () => {
-  return JSON.parse(localStorage.getItem("token"))
-    ? JSON.parse(localStorage.getItem("token")).userName
-    : "Guest";
+  const tokenData = JSON.parse(localStorage.getItem("token"));
+  return tokenData ? tokenData.userName : "Guest";
 };
 
 /////  REGISTRACIJA
@@ -115,6 +127,7 @@ const displayAds = (adsList) => {
   adsContainer.innerHTML = "";
 
   const tokenData = JSON.parse(localStorage.getItem("token"));
+  const role = tokenData ? tokenData.role : null;
   const loggedInUser = tokenData ? tokenData._id : null;
   console.log(loggedInUser);
 
@@ -135,7 +148,10 @@ const displayAds = (adsList) => {
     card.append(title, description, price);
     adsContainer.append(card);
 
-    if (loggedInUser && loggedInUser.toString() === ad.userID.toString()) {
+    if (
+      (loggedInUser && loggedInUser.toString() === ad.userID.toString()) ||
+      role === "admin"
+    ) {
       const buttonsContainer = document.createElement("div");
       buttonsContainer.setAttribute("class", "adButtonsContainer");
 
@@ -152,10 +168,105 @@ const displayAds = (adsList) => {
       buttonsContainer.append(editBtn, deleteBtn);
       card.append(buttonsContainer);
 
-      //   editBtn.addEventListener("click", handleClickEdit);
-      //   deleteBtn.addEventListener("click", handleClickDelete); /// pasidaryti pabaigti namie
+      editBtn.addEventListener("click", handleClickEdit);
+      deleteBtn.addEventListener("click", handleClickDelete); /// pasidaryti pabaigti namie
     }
   });
+};
+
+//// delete skelbimas
+// const handleClickDelete = (e) => {
+//   const adId = e.target.getAttribute("data-id");
+//   const token = JSON.parse(localStorage.getItem("token")).token;
+//   console.log(adId);
+
+//   fetch(`http://localhost:8000/ads/${adId}`, {
+//     method: "DELETE",
+//     headers: {
+//       "Content-Type": "application/json",
+//       authorization: `Bearer ${token}`,
+//     },
+//   })
+//     .then((resp) => {
+//       if (!resp.ok) {
+//         throw new Error(`Server responded with status ${resp.status}`);
+//       }
+//       return resp.json();
+//     })
+//     .then((data) => {
+//       console.log(data);
+//       alert("Skelbimas istrintas");
+//       getAllAds();
+//     })
+//     .catch((err) => console.error(err));
+// };
+
+const handleClickDelete = (e) => {
+  const adId = e.target.getAttribute("data-id");
+  const tokenData = JSON.parse(localStorage.getItem("token"));
+  fetch(`http://localhost:8000/ads/${adId}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${tokenData.token}`,
+    },
+  })
+    .then(() => getAllAds())
+    .catch((err) => console.error(err));
+};
+
+//// edit skelbimas
+// const handleClickEdit = (e) => {
+//   const adId = e.target.getAttribute("data-id");
+//   const newTitle = prompt("Enter new title:");
+//   const newDescription = prompt("Enter new description:");
+//   const newPrice = prompt("Enter new price:");
+//   const token = JSON.parse(localStorage.getItem("token")).token;
+//   console.log(adId);
+
+//   const updatedAd = {
+//     title: newTitle,
+//     description: newDescription,
+//     price: newPrice,
+//   };
+//   fetch(`http://localhost:8000/ads/${adId}`, {
+//     method: "PUT",
+//     headers: {
+//       "Content-Type": "application/json",
+//       authorization: `Bearer ${token}`,
+//     },
+//     body: JSON.stringify(updatedAd),
+//   })
+//     .then((resp) => {
+//       if (!resp.ok) {
+//         throw new Error(`Server responded with status ${resp.status}`);
+//       }
+//       return resp.json();
+//     })
+//     .then((data) => {
+//       console.log(data);
+//       alert("Skelbimas atnaujintas");
+//       getAllAds();
+//     })
+//     .catch((err) => console.error(err));
+// };
+
+const handleClickEdit = (e) => {
+  const adId = e.target.getAttribute("data-id");
+  const tokenData = JSON.parse(localStorage.getItem("token"));
+  const title = prompt("Naujas pavadinimas:");
+  const description = prompt("Naujas aprašymas:");
+  const price = prompt("Nauja kaina:");
+  if (!title || !description || !price) return;
+  fetch(`http://localhost:8000/ads/${adId}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${tokenData.token}`,
+    },
+    body: JSON.stringify({ title, description, price }),
+  })
+    .then(() => getAllAds())
+    .catch((err) => console.error(err));
 };
 
 ////// Skelbimo irasymas
