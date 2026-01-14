@@ -19,6 +19,15 @@ const adSchema = new mongoose.Schema(
       type: Number,
       required: [true, "Please enter price, Eur"],
     },
+    category: {
+      type: String,
+      required: [true, "Please add category"],
+    },
+    likes: {
+      type: [mongoose.Schema.Types.ObjectId],
+      ref: "User",
+      default: [],
+    },
   },
   {
     timestamps: true,

@@ -9,7 +9,7 @@ const Ad = require("../model/Ad.js");
 const createAd = asyncHandler(async (req, res) => {
   //  const {title, description, price} = req.body;
 
-  if (!req.body.title || !req.body.description || !req.body.price) {
+  if (!req.body.title || !req.body.description || !req.body.price || !req.body.category) {
     res.status(400);
     throw new Error("Please fill required fields");
   }
@@ -18,6 +18,7 @@ const createAd = asyncHandler(async (req, res) => {
     title: req.body.title,
     description: req.body.description,
     price: req.body.price,
+    category: req.body.category,
     userID: req.user.id,
   });
   res.status(200).json(ad);

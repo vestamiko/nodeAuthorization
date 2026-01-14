@@ -1,21 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Adverts app</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-<h2 id="greeting"></h2>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <h2 id="greeting"></h2>
 
-<a href="login.html">Prisijungimo puslapis</a>
+    <a href="login.html">Prisijungimo puslapis</a>
+    <button id="signOut">Atsijungti</button>
 
-
-
-
-    <form id = "registerForm">
-        <!-- <h2> Registracija </h2>
+    <form id="registerForm">
+      <!-- <h2> Registracija </h2>
         <label for="username">Vartotojo vardas</label>
    <input type="text" id="usernameInputReg" name ="username"/>
     <br>
@@ -26,11 +24,10 @@
    <input type="password" id="passwordInputReg" name ="password"/>
     </br>
 <button type="submit" id="submitReg"> Registruotis</button> -->
-   
-</form>
+    </form>
 
-<form id = "loginForm">
-<!-- 
+    <form id="loginForm">
+      <!-- 
     <h2>Prisijungimas</h2>
 
     <label for="emailInputLog">el. pastas</label>
@@ -41,28 +38,34 @@
     <input type="password" name = "password" id ="passwordInputLog"/>
 
 <button type ="submit" id="submitLog"> prisijungti</button> -->
-</form>
+    </form>
 
-<form id="adsForm">
+    <form id="adsForm">
+      <h2>Kategorija</h2>
+      <h2>Sukurti skelbima</h2>
+      <label> Pasirinkite kategorija: </label>
+      <select id="categoryInput" name="category">
+        <option value="all">Visi</option>
+        <option value="produktai">Produktai</option>
+        <option value="elektronika">Elektronika</option>
+        <option value="baldai">Baldai</option>
+        <option value="gyvunai">Gyvunai</option>
+      </select>
 
-    <h2> sukurti skelbima</h2>
+      <label for="titleInput"> Pavadinimas</label>
+      <input type="text" name="title" id="titleInput" />
 
-<label for="titleInput"> Pavadinimas</label>
-<input type="text" name = "title" id="titleInput"/>
+      <label for="descriptionInput"> Aprasymas</label>
+      <input type="text" name="description" id="descriptionInput" />
 
-<label for="descriptionInput"> Aprasymas</label>
-<input type="text" name = "description" id="descriptionInput"/>
+      <label for="priceInput"> Kaina</label>
+      <input type="text" name="price" id="priceInput" />
 
-<label for="priceInput"> Kaina</label>
-<input type="text" name = "price" id="priceInput"/>
+      <button type="submit" id="ceateAd">Paskelbti</button>
+    </form>
 
-<button type = "submit" id="ceateAd">Paskelbti</button>
+    <div id="adsContainer"></div>
 
-</form>
-
-   <div id = "adsContainer"></div>
-
-
-    <script src = "script.js" type="module"></script>
-</body>
+    <script src="script.js" type="module"></script>
+  </body>
 </html>
