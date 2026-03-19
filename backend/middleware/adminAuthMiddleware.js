@@ -9,11 +9,11 @@ const protectAdmin = asyncHandler(async (req, res, next) => {
       req.user = response;
       next();
     } else {
-      res.send(401, notAuhorizedMessage);
+      res.status(401).json({ message: notAuhorizedMessage });
     }
   } else {
-    res.send(status, response);
+    res.status(status).json(response);
   }
 });
 
-module.exports = protectAdmin;
+module.exports = protectAdmin; 

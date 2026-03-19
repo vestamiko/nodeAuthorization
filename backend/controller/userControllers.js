@@ -104,4 +104,25 @@ const getAllUsers = asyncHandler(async (req, res) => {
   res.status(200).json(users);
 });
 
-module.exports = { registerUser, loginUser, getOneUser, getAllUsers };
+const toggleFavorite = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user.id);
+  const adId = req.params.adId;
+
+  const exists = user.favorites.includes(adId);
+
+  if (exists) {
+    user.favorites = user.favorites.filter(id => id.toString() !== adId);
+  } else {
+    user.favorites.push(adId);
+  }
+
+  await user.save();
+  res.json(user.favorites);
+});
+
+const getFavorites = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user.id).populate("favorites");
+  res.json(user.favorites);
+});
+
+module.exports = { registerUser, loginUser, getOneUser, getAllUsers, toggleFavorite, getFavorites };

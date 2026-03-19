@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const Ad = require("../models/Ad");
+const Ad = require("../model/Ad");
 
 const {
   createAd,
@@ -12,7 +12,18 @@ const {
 } = require("../controller/adControllers.js");
 const protect = require("../middleware/authMiddleware.js");
 
-///
+/// comentaru skiltis
+router.post("/:id/comment", protect, async (req, res) => {
+const ad = await Ad.findById(req.params.id);
+ad.comments.push({
+ user: req.user.userName,
+ text: req.body.text
+});
+await ad.save();
+res.json(ad);
+});
+
+/// laik mygtukas
 router.post("/:id/like", protect, async (req, res) => {
   try {
     const ad = await Ad.findById(req.params.id);

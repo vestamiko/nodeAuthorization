@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Registracija</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>Registracija</h1>
+    <form id="registerForm">
+      <label for="usernameInputReg">Vartotojo vardas</label>
+      <input type="text" id="usernameInputReg" name="username" />
+
+      <label for="emailInputReg">El. paštas</label>
+      <input type="email" id="emailInputReg" name="email" />
+
+      <label for="passwordInputReg">Slaptažodis</label>
+      <input type="password" id="passwordInputReg" name="password" />
+
+      <button type="submit" id="submitReg">Registruotis</button>
+      <button type="button" class="backBtn" onclick="window.location.href='index.html'">
+        Grįžti į skelbimus
+      </button>
+    </form>
+    <p> Jau turi paskyra? 
+      <a href="login.html"> Prisijungti </a>
+    </p>
+  </div>
+  <script src="script.js" type="module"></script>
+</body>
+</html>

@@ -21,8 +21,47 @@ const createAd = document.getElementById("createAd");
 const signOut = document.getElementById("signOut");
 const greeting = document.getElementById("greeting");
 const adsForm = document.getElementById("adsForm");
+const favoritesBtn = document.getElementById("favoritesBtn");
+const backBtn= document.getElementById("backBtn");
 
-/// adsList
+const commentsContainer = document.createElement("div");
+
+/// megstami
+const showFavoriteAds = () => {
+const tokenData = JSON.parse(localStorage.getItem("token"));
+    if (!tokenData) {
+        alert("Prisijunk, kad matytum mėgstamus");
+        return;
+    }
+
+    const userId = tokenData._id;
+    const favoriteAds = allAds.filter(ad =>
+        ad.likes?.some(id => id.toString() === userId.toString())
+    );
+
+    displayAds(favoriteAds);
+
+    // rodom atgal mygtuka
+    if (backBtn) {
+        backBtn.style.display = "inline-block";
+    }
+  };
+    
+    
+// paspaudus Megstami
+if (favoritesBtn) {
+    favoritesBtn.addEventListener("click", showFavoriteAds);
+}
+
+ // ATGAL I VISUS
+if (backBtn) {
+   backBtn.addEventListener("click", () => {
+       displayAds(allAds);
+       backBtn.style.display = "none";
+   });
+}
+
+/// adsList login forma
 if (loginForm) {
   loginForm.addEventListener("submit", (e) => {
     e.preventDefault();
@@ -43,14 +82,16 @@ if (loginForm) {
   });
 }
 ///// GREETING
-const tokenData = JSON.parse(localStorage.getItem("token"));
+const tokenDataRaw = localStorage.getItem("token");
+const tokenData = tokenDataRaw ? JSON.parse(tokenDataRaw) : null;
+
 if (greeting) {
-  if (tokenData) {
-    greeting.innerHTML = `Labas, ${tokenData.userName}`;
+  if (tokenData && tokenData.userName) {
+    greeting.textContent = `Labas, ${tokenData.userName}`
   } else {
-    greeting.innerHTML = `Labas, Guest`;
+    greeting.textContent = "Labas, Guest";
   }
-}
+};
 
 //// GAUTI TOKEN IS LS
 // const dataFromLS = () => {
@@ -64,6 +105,7 @@ const dataFromLS = () => {
 };
 
 /////  REGISTRACIJA
+if (registerForm) {
 registerForm.addEventListener("submit", (e) => {
   e.preventDefault();
 
@@ -88,34 +130,7 @@ registerForm.addEventListener("submit", (e) => {
 
     .catch((err) => console.error(err));
 });
-
-/// prisijungimas
-
-loginForm.addEventListener("submit", (e) => {
-  e.preventDefault();
-
-  const email = emailInputLog.value.trim().toLowerCase();
-  const password = passwordInputLog.value.trim();
-
-  fetch("http://localhost:8000/users/login", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, password }),
-  })
-    .then((resp) => resp.json())
-    .then((data) => {
-      console.log(data);
-
-      localStorage.setItem("token", JSON.stringify(data));
-
-      greeting.innerHTML = `Labas, ${dataFromLS}`;
-
-      loginForm.reset();
-
-      getAllAds();
-    })
-    .catch((err) => console.error(err));
-});
+}
 
 ////// visu skelbimu gavimas
 let allAds = [];
@@ -162,20 +177,24 @@ categoryInput.addEventListener("change", (e) => {
   }
 });
 
+// if (localStorage.getItem("token")) {
 getAllAds();
+// }
 
 //// skelbimu atvaizdavimas
 
 const displayAds = (adsList) => {
+  currentAds = adsList;
   if (!adsContainer) return;
+
   adsContainer.innerHTML = "";
 
   const tokenData = JSON.parse(localStorage.getItem("token"));
   const role = tokenData ? tokenData.role : null;
   const loggedInUser = tokenData ? tokenData._id : null;
-  console.log(loggedInUser);
 
   adsList.forEach((ad) => {
+
     const card = document.createElement("div");
     card.classList.add("card");
     card.style.border = "1px solid black";
@@ -187,29 +206,28 @@ const displayAds = (adsList) => {
     description.textContent = ad.description;
 
     const price = document.createElement("p");
-    price.textContent = ad.price + "Eur";
+    price.textContent = ad.price + " Eur";
 
     const category = document.createElement("p");
     category.textContent = "Category: " + ad.category;
 
     card.append(title, description, price, category);
-    adsContainer.append(card);
 
+    /// EDIT / DELETE
     if (
       (loggedInUser && loggedInUser.toString() === ad.userID.toString()) ||
       role === "admin"
     ) {
+
       const buttonsContainer = document.createElement("div");
-      buttonsContainer.setAttribute("class", "adButtonsContainer");
+      buttonsContainer.classList.add("adButtonsContainer");
 
       const editBtn = document.createElement("button");
       editBtn.textContent = "EDIT";
-      editBtn.classList.add("edit");
       editBtn.setAttribute("data-id", ad._id);
 
       const deleteBtn = document.createElement("button");
       deleteBtn.textContent = "DELETE";
-      deleteBtn.classList.add("delete");
       deleteBtn.setAttribute("data-id", ad._id);
 
       buttonsContainer.append(editBtn, deleteBtn);
@@ -218,72 +236,94 @@ const displayAds = (adsList) => {
       editBtn.addEventListener("click", handleClickEdit);
       deleteBtn.addEventListener("click", handleClickDelete);
     }
-    // LIKE BUTTON
+
+    /// LIKE
     const likeBtn = document.createElement("button");
+
     const userHasLiked =
       loggedInUser &&
       ad.likes?.some((id) => id.toString() === loggedInUser.toString());
-    likeBtn.textContent = `${userHasLiked ? "❤️" : "🤍"} ${
-      ad.likes?.length || 0
-    }`;
+
+    likeBtn.textContent = `${userHasLiked ? "❤️" : "🤍"} ${ad.likes?.length || 0}`;
+
     likeBtn.addEventListener("click", async () => {
+
       const tokenData = JSON.parse(localStorage.getItem("token"));
-      if (!tokenData || !tokenData.token) {
+
+      if (!tokenData?.token) {
         alert("Prisijunk, kad galėtum pamėgti");
         return;
       }
+
       const res = await fetch(`http://localhost:8000/ads/${ad._id}/like`, {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${tokenData.token}`,
-        },
+          Authorization: `Bearer ${tokenData.token}`
+        }
       });
 
-      if (!res.ok) {
-        alert("Klaida bandant pamėgti skelbimą");
-        return;
-      }
-
       const updatedAd = await res.json();
-      console.log("updated ad", updatedAd);
-      // 🟢 Atnaujinam tik šitą mygtuką
-      const likedNow = updatedAd.likes?.some(
-        (id) => id.toString() === loggedInUser.toString()
+
+      allAds = allAds.map(a =>
+        a._id === updatedAd._id ? updatedAd : a
       );
-      likeBtn.textContent = `${likedNow ? "❤️" : "🤍"} ${
-        updatedAd.likes?.length || 0
-      }`;
+
+      displayAds(allAds);
     });
+
     card.appendChild(likeBtn);
+
+    /// KOMENTARAI
+    const commentsContainer = document.createElement("div");
+    commentsContainer.className = "comments mt-3";
+
+    ad.comments?.forEach(c => {
+      const comment = document.createElement("p");
+      comment.textContent = `${c.user}: ${c.text}`;
+      commentsContainer.appendChild(comment);
+    });
+
+    /// NAUJAS KOMENTARAS
+    if (loggedInUser) {
+
+      const input = document.createElement("input");
+      input.placeholder = "Rašyti komentarą...";
+      input.className = "form-control mb-2";
+
+      const btn = document.createElement("button");
+      btn.textContent = "Komentuoti";
+      btn.className = "btn btn-sm btn-primary";
+
+      btn.addEventListener("click", async () => {
+
+        const text = input.value;
+
+        if (!text) return;
+
+        const tokenData = JSON.parse(localStorage.getItem("token"));
+
+        await fetch(`http://localhost:8000/ads/${ad._id}/comment`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${tokenData.token}`
+          },
+          body: JSON.stringify({ text })
+        });
+
+        getAllAds();
+      });
+
+      commentsContainer.append(input, btn);
+    }
+
+    card.appendChild(commentsContainer);
+
+    adsContainer.appendChild(card);
   });
 };
 
 //// delete skelbimas
-// const handleClickDelete = (e) => {
-//   const adId = e.target.getAttribute("data-id");
-//   const token = JSON.parse(localStorage.getItem("token")).token;
-//   console.log(adId);
-
-//   fetch(`http://localhost:8000/ads/${adId}`, {
-//     method: "DELETE",
-//     headers: {
-//       "Content-Type": "application/json",
-//       authorization: `Bearer ${token}`,
-//     },
-//   })
-//     .then((resp) => {
-//       if (!resp.ok) {
-//         throw new Error(`Server responded with status ${resp.status}`);
-//       }
-//       return resp.json();
-//     })
-//     .then((data) => {
-//       console.log(data);
-//       alert("Skelbimas istrintas");
-//       getAllAds();
-//     })
-//     .catch((err) => console.error(err));
-// };
 
 const handleClickDelete = (e) => {
   const adId = e.target.getAttribute("data-id");
@@ -299,111 +339,76 @@ const handleClickDelete = (e) => {
 };
 
 //// edit skelbimas
-// const handleClickEdit = (e) => {
-//   const adId = e.target.getAttribute("data-id");
-//   const newTitle = prompt("Enter new title:");
-//   const newDescription = prompt("Enter new description:");
-//   const newPrice = prompt("Enter new price:");
-//   const token = JSON.parse(localStorage.getItem("token")).token;
-//   console.log(adId);
-
-//   const updatedAd = {
-//     title: newTitle,
-//     description: newDescription,
-//     price: newPrice,
-//   };
-//   fetch(`http://localhost:8000/ads/${adId}`, {
-//     method: "PUT",
-//     headers: {
-//       "Content-Type": "application/json",
-//       authorization: `Bearer ${token}`,
-//     },
-//     body: JSON.stringify(updatedAd),
-//   })
-//     .then((resp) => {
-//       if (!resp.ok) {
-//         throw new Error(`Server responded with status ${resp.status}`);
-//       }
-//       return resp.json();
-//     })
-//     .then((data) => {
-//       console.log(data);
-//       alert("Skelbimas atnaujintas");
-//       getAllAds();
-//     })
-//     .catch((err) => console.error(err));
-// };
+let currentAds = [];
+let editingAdId = null;
 
 const handleClickEdit = (e) => {
   const adId = e.target.getAttribute("data-id");
-  const tokenData = JSON.parse(localStorage.getItem("token"));
-  const title = prompt("Naujas pavadinimas:");
-  const description = prompt("Naujas aprašymas:");
-  const price = prompt("Nauja kaina:");
-  const category = prompt("Nauja kategorija:");
-  if (!title || !description || !price || !category) return;
-  fetch(`http://localhost:8000/ads/${adId}`, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${tokenData.token}`,
-    },
-    body: JSON.stringify({ title, description, price, category }),
-  })
-    .then(() => getAllAds())
-    .catch((err) => console.error(err));
+  const ad = currentAds.find((item) => item._id === adId);
+
+  if (!ad) return;
+
+  titleInput.value = ad.title;
+  descriptionInput.value = ad.description;
+  priceInput.value = ad.price;
+  categoryInput.value = ad.category;
+
+  editingAdId = adId;
+
+  createAd.textContent = "Atnaujinti";
 };
 
 ////// Skelbimo irasymas
-if (adsForm) {
-  adsForm.addEventListener("submit", (e) => {
-    e.preventDefault();
+if(adsForm) {
+adsForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
 
-    const adContent = {
-      title: titleInput.value.trim(),
-      description: descriptionInput.value.trim(),
-      price: priceInput.value.trim(),
-      category: categoryInput.value,
-    };
-    if (!adContent.category) {
-      alert("Pasirinkite kategorija");
-      return;
-    }
-    if (categoryInput.value === "all") {
-      alert("Negalima pasirinkti 'Visi' kaip kategorijos");
-      return;
-    }
+  const adData = {
+    title: titleInput.value,
+    description: descriptionInput.value,
+    price: priceInput.value,
+    category: categoryInput.value,
+  };
 
-    const token = JSON.parse(localStorage.getItem("token")).token;
-    console.log(token);
+  const tokenData = JSON.parse(localStorage.getItem("token"));
 
-    if (!token) {
-      console.log("No JWT token. Please Log in");
-      return;
-    }
+  if (!tokenData?.token) {
+    alert("Prisijunk");
+    return;
+  }
 
-    fetch("http://localhost:8000/ads", {
+  // UPDATE
+  if (editingAdId) {
+    await fetch(`http://localhost:8000/ads/${editingAdId}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${tokenData.token}`,
+      },
+      body: JSON.stringify(adData),
+    });
+
+    editingAdId = null;
+    createAd.textContent = "Paskelbti";
+  } 
+  // CREATE
+  else {
+    await fetch("http://localhost:8000/ads", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${tokenData.token}`,
       },
+      body: JSON.stringify(adData),
+    });
+  }
 
-      body: JSON.stringify(adContent),
-    })
-      .then((resp) => {
-        if (!resp.ok) {
-          throw new Error(`Server responded with status ${resp.status}`);
-        }
-        return resp.json();
-      })
-      .then((data) => {
-        console.log(data);
-        alert("Skelbimas sukurtas!");
-        getAllAds();
-      })
-      .catch((err) => console.error(err));
-  });
+  titleInput.value = "";
+  descriptionInput.value = "";
+  priceInput.value = "";
+
+  getAllAds();
+});
 }
 
 //// sign out

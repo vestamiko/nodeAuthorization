@@ -28,10 +28,20 @@ const adSchema = new mongoose.Schema(
       ref: "User",
       default: [],
     },
+    comments: [
+      {
+      user: String,
+      text: String,
+      date: {
+        type: Date,
+        default: Date.now
+      }
+  }
+]
+
   },
   {
-    timestamps: true,
-  }
-);
+    timestamps: true
+  });
 
 module.exports = mongoose.model("Ad", adSchema);

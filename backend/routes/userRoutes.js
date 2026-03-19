@@ -6,6 +6,8 @@ const {
   loginUser,
   getOneUser,
   getAllUsers,
+  toggleFavorite,
+  getFavorites,
 } = require("../controller/userControllers.js");
 
 const protect = require("../middleware/authMiddleware.js");
@@ -17,7 +19,10 @@ router.post("/register", registerUser);
 router.post("/login", loginUser);
 // http://localhost:8000/users/user
 router.get("/user", protect, getOneUser);
+// http://localhost:8000/users/all
 router.get("/all", protectAdmin, getAllUsers);
-
+// favorites
+router.post("/favorites/:adId", protect, toggleFavorite);
+router.get("/favorites", protect, getFavorites);
 
 module.exports = router;
