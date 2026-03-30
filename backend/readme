@@ -15,3 +15,41 @@ slaptazodis: vesta
 
 saule:
 slaptazodis: saule
+
+terminalas npm run seek
+
+admin:
+admin@gmail.com
+admin
+
+package.json install:
+npm init -y
+
+package-lock.json install:
+npm install express
+
+.env:
+PORT=8000
+MONGO_DB=mongodb+srv://vestamikolajunaite_db_user:Vilimaite1998@cluster0.xlq4tcn.mongodb.net/dienospietus
+JWT_SECRET=betkoks_ilgas_slaptas_tekstas
+
+.gitignore irasyti:
+/node_modules
+.env
+
+idiegti nodemon:
+npm install nodemon --save-dev
+
+globaliai:
+npm install -g nodemon
+
+cors:
+npm install cors
+
+npm i express
+
+npm install mongoose
+
+npm install dotenv
+
+npm install jsonwebtoken
